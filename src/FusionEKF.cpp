@@ -92,6 +92,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       
       ekf_.x_(0) =  px;
       ekf_.x_(1) =  py;
+	  ekf_.x_(2) =  0;
+	  ekf_.x_(3) =  0;
       cout<<"Initilized with LASER data"<<endl;
     }
     previous_timestamp_ = measurement_pack.timestamp_;
@@ -108,7 +110,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                 0, 0, 0, 1000;
     // done initializing, no need to predict or update
     is_initialized_ = true;
-    cout<<ekf_.x_<<endl;
+    //cout<<ekf_.x_<<endl;
     return;
   }
 
@@ -172,6 +174,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   }
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  // cout << "x_ = " << ekf_.x_ << endl;
+  // cout << "P_ = " << ekf_.P_ << endl;
 }
