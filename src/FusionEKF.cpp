@@ -92,8 +92,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       
       ekf_.x_(0) =  px;
       ekf_.x_(1) =  py;
-	  ekf_.x_(2) =  0;
-	  ekf_.x_(3) =  0;
+      ekf_.x_(2) =  1;
+      ekf_.x_(3) =  1;
       cout<<"Initilized with LASER data"<<endl;
     }
     previous_timestamp_ = measurement_pack.timestamp_;
@@ -129,26 +129,27 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;	//dt - expressed in seconds
   previous_timestamp_ = measurement_pack.timestamp_;
 
-  float dt_2 = dt   * dt;
-  float dt_3 = dt_2 * dt;
-  float dt_4 = dt_3 * dt;
+  if (dt > 0.)
+  {
+    float dt_2 = dt   * dt;
+    float dt_3 = dt_2 * dt;
+    float dt_4 = dt_3 * dt;
 
-  ekf_.F_(0, 2) = dt;
-  ekf_.F_(1, 3) = dt;
+    ekf_.F_(0, 2) = dt;
+    ekf_.F_(1, 3) = dt;
 
-  //Acceleration noise components for Q matrix
-  float noise_ax = 9;
-  float noise_ay = 9;
+    //Acceleration noise components for Q matrix
+    float noise_ax = 9;
+    float noise_ay = 9;
 
-  //Process covariance matrix 'Q'
-  ekf_.Q_ = MatrixXd(4, 4);
-  ekf_.Q_ << dt_4 / 4 * noise_ax, 0, dt_3 / 2 * noise_ax, 0,
-             0, dt_4 / 4 * noise_ay, 0, dt_3 / 2 * noise_ay,
-             dt_3 / 2 * noise_ax, 0, dt_2*noise_ax, 0,
-             0, dt_3 / 2 * noise_ay, 0, dt_2*noise_ay;
-             
-  ekf_.Predict();
-
+    //Process covariance matrix 'Q'
+    ekf_.Q_ = MatrixXd(4, 4);
+    ekf_.Q_ << dt_4 / 4 * noise_ax, 0, dt_3 / 2 * noise_ax, 0,
+              0, dt_4 / 4 * noise_ay, 0, dt_3 / 2 * noise_ay,
+              dt_3 / 2 * noise_ax, 0, dt_2*noise_ax, 0,
+              0, dt_3 / 2 * noise_ay, 0, dt_2*noise_ay;
+              
+    ekf_.Predict();
   /*****************************************************************************
    *  Update
    ****************************************************************************/
@@ -171,6 +172,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.H_ = H_laser_;
     ekf_.R_ = R_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
+  }
+  }
+  else
+  {
+    cout<<"previous data"<<endl;
   }
 
   // print the output
